@@ -37,13 +37,21 @@ textbackend/
 ## Основные API эндпоинты
 
 /api/v1/auth/telegram-login — Логин через Telegram
+
 /api/v1/shops/ — Магазины
+
 /api/v1/products/ — Товары
+
 /api/v1/categories/ — Категории
+
 /api/v1/cart/ — Корзина
+
 /api/v1/orders/ — Заказы
+
 /api/v1/payments/ — Платежи, вебхуки, возвраты
+
 /api/v1/telegram/webhook — Webhook Telegram
+
 /api/v1/health — Healthcheck
 
 Swagger: /api/v1/docs
@@ -54,6 +62,7 @@ Swagger: /api/v1/docs
 Запуск тестов (pytest)
 Сборка и публикация Docker-образа
 Деплой на сервер (по main)
+
 
 Файл: .github/workflows/ci-cd.yml
 
