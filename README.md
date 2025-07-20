@@ -20,6 +20,7 @@
 ---
 
 ## Структура проекта
+...
 textbackend/
   app/
     api/         # FastAPI ручки (v1)
@@ -32,7 +33,7 @@ textbackend/
   alembic/       # Миграции
   main.py        # Точка входа FastAPI
   pyproject.toml # Зависимости Poetry
-  ...
+...
 
 ## Основные API эндпоинты
 
