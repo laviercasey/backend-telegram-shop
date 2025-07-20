@@ -1,0 +1,58 @@
+# docker/backend/Dockerfile
+FROM python:3.10-slim as builder
+
+WORKDIR /app
+
+# Установка Poetry
+RUN pip install --no-cache-dir poetry==1.5.1
+
+# Копирование файлов только для установки зависимостей
+COPY pyproject.toml poetry.lock* /app/
+
+# Настройка Poetry для экспорта зависимостей в requirements.txt
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+# Установка зависимостей в виртуальное окружение
+RUN python -m venv /app/venv
+ENV PATH="/app/venv/bin:$PATH"
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Второй этап для минимального образа
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Установка необходимых системных пакетов
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Копирование виртуального окружения из builder
+COPY --from=builder /app/venv /app/venv
+
+# Настройка переменных окружения
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/app/venv/bin:$PATH"
+
+# Копирование кода приложения
+COPY . /app/
+
+# Создание непривилегированного пользователя
+RUN adduser --disabled-password --gecos "" appuser && \
+    chown -R appuser:appuser /app
+
+# Создание директории для загрузок с правильными правами
+RUN mkdir -p /app/uploads && \
+    chown -R appuser:appuser /app/uploads
+
+# Переключение на непривилегированного пользователя
+USER appuser
+
+# Проверка здоровья
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/api/v1/health || exit 1
+
+# Запуск приложения
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
